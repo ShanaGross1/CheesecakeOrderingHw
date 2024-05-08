@@ -15,9 +15,5 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
   </ItemGroup>
   
-  <ItemGroup>
-    <Folder Include="NewFolder\" />
-  </ItemGroup>
-  
 
 </Project>

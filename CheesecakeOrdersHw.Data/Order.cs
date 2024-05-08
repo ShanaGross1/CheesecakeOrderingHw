@@ -12,7 +12,6 @@ namespace CheesecakeOrdersHw.Data
         public string Name { get; set; }
         public string Email { get; set; }
         public string Toppings { get; set; }
-
         public string BaseFlavor { get; set; }
         public string SpecialRequests { get; set; }
         public int Quantity { get; set; }

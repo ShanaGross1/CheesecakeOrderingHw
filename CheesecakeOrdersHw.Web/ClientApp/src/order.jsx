@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from "dayjs";
 
-const toppings = ['Chocolate Chips', 'Caramel Drizzle', 'Whipped Cream', 'Pecans', 'Almonds', 'Toasted Coconut', 'Graham Cracker Crumble', 'Cookie Dough', 'Mint Chocolate Chips', 'Caramelized Bananas',
+const toppingsList = ['Chocolate Chips', 'Caramel Drizzle', 'Whipped Cream', 'Pecans', 'Almonds', 'Toasted Coconut', 'Graham Cracker Crumble', 'Cookie Dough', 'Mint Chocolate Chips', 'Caramelized Bananas',
     'Rainbow Sprinkles', 'Powdered Sugar', 'White Chocolate Shavings', 'Peanut Butter Drizzlwe', 'Dark Chocolate Drizzle'];
 
 const Order = () => {
@@ -18,11 +18,15 @@ const Order = () => {
         toppings: []
     });
 
+    const { name, email, baseFlavor, toppings, specialRequests, quantity, deliveryDate } = order;
+
+    const orderTotal = (quantity * 49.99) + (toppings.length * 3.95 * quantity);
+
+    const selectedToppingsAsString = toppings.map(t => ' ' + t).toString();
+
+    const isValidOrder = (name && email && deliveryDate);
+
     const navigate = useNavigate();
-
-    const orderTotal = (order.quantity * 49.99) + (order.toppings.length * 3.95 * order.quantity);
-
-    const isValidOrder = (order.name && order.email && order.deliveryDate);
 
     const onInputChange = e => {
         let copy = { ...order };
@@ -31,13 +35,13 @@ const Order = () => {
     }
 
     const onSubmitClick = async () => {
-        await axios.post('/api/orders/add', { ...order, total: orderTotal, toppings: toppings.map(t => t + ", ").toString() })
+        await axios.post('/api/orders/add', { ...order, total: orderTotal, toppings: selectedToppingsAsString })
         navigate('/view-orders')
     }
 
-    const onToppingsCheckBoxClick = (currentTopping) => {
-        let toppingsList = order.toppings.includes(currentTopping) ? [...order.toppings.filter(t => t !== currentTopping)] : [...order.toppings, currentTopping];
-        setOrder({ ...order, toppings: toppingsList })
+    const onToppingsCheckBoxClick = (selected) => {
+        let selectedToppings = toppings.includes(selected) ? [...toppings.filter(t => t !== selected)] : [...toppings, selected];
+        setOrder({ ...order, toppings: selectedToppings })
     }
 
     return (<>
@@ -47,17 +51,17 @@ const Order = () => {
                 <div className="col-md-6">
                     <div className="row">
                         <label className="form-label">Name</label>
-                        <input type="text" className="form-control" onChange={onInputChange} value={order.name} name='name' />
+                        <input type="text" className="form-control" onChange={onInputChange} value={name} name='name' />
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label">Email</label>
-                        <input type="text" className="form-control" onChange={onInputChange} value={order.email} name='email' />
+                        <input type="text" className="form-control" onChange={onInputChange} value={email} name='email' />
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label">Cheesecake Base Flavor</label>
-                        <select className='form-select' onChange={onInputChange} value={order.baseFlavor} name='baseFlavor'>
+                        <select className='form-select' onChange={onInputChange} value={baseFlavor} name='baseFlavor'>
                             <option>Choose...</option>
                             <option>Classic</option>
                             <option>Chocolate</option>
@@ -67,7 +71,7 @@ const Order = () => {
                     </div>
 
                     <label className="form-label">Toppings (each topping adds an additional $3.95)</label>
-                    {toppings.map((t, idx) => {
+                    {toppingsList.map((t, idx) => {
                         return (
                             <div key={idx} className="form-check" >
                                 <input className="form-check-input" type="checkbox" onChange={() => onToppingsCheckBoxClick(t)} />
@@ -77,34 +81,35 @@ const Order = () => {
                     })}
                     <div className="mb-3">
                         <label className="form-label">Special Requests</label>
-                        <textarea className="form-control" rows="3" onChange={onInputChange} value={order.specialRequests} name='specialRequests'></textarea>
+                        <textarea className="form-control" rows="3" onChange={onInputChange} value={specialRequests} name='specialRequests'></textarea>
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label">Quantity</label>
-                        <input type="number" className="form-control" min="1" value="1" onChange={onInputChange} value={order.quantity} name='quantity' />
+                        <input type="number" className="form-control" min="1" onChange={onInputChange} value={quantity} name='quantity' />
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label">Delivery Date</label>
-                        <input type="date" className="form-control" onChange={onInputChange} value={order.deliveryDate} name='deliveryDate' />
+                        <input type="date" className="form-control" onChange={onInputChange} value={deliveryDate} name='deliveryDate' />
                     </div>
 
-                    <button className='btn btn-primary' onClick={onSubmitClick} disabled={isValidOrder ? false : true}>Submit Order</button>
+                    <button className='btn btn-primary' onClick={onSubmitClick} disabled={!isValidOrder}>Submit Order</button>
                 </div>
             </div>
         </div >
+
         <div className="col-md-6 position-sticky" >
             <h2 className="mb-4">Live Preview</h2>
             <div className="card" >
                 <button>picture</button>
                 <div className="card-body">
                     <h5 className="card-title">Your Custom Cheesecake</h5>
-                    <p className="card-text"> "Base:" {order.baseFlavor}</p>
-                    <p className="card-text">Toppings: {order.toppings.map(t => t + ", ").toString()}</p>
-                    <p className="card-text">Special Requests: {order.specialRequests} </p>
-                    <p className="card-text">Quantity: {order.quantity} </p>
-                    <p className="card-text">Delivery Date: {dayjs(order.deliveryDate).format("MM/DD/YYYY")} </p>
+                    <p className="card-text"> "Base:" {baseFlavor}</p>
+                    <p className="card-text">Toppings: {selectedToppingsAsString}</p>
+                    <p className="card-text">Special Requests: {specialRequests} </p>
+                    <p className="card-text">Quantity: {quantity} </p>
+                    <p className="card-text">Delivery Date: {dayjs(deliveryDate).format("MM/DD/YYYY")} </p>
                     <p className="card-text fw-bold">Total: {orderTotal.toFixed(2)}</p>
                 </div>
             </div>

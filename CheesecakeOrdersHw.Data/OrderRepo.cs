@@ -26,6 +26,7 @@ namespace CheesecakeOrdersHw.Data
             context.Add(order);
             context.SaveChanges();
         }
+
         public Order GetById (int id)
         {
             using var context = new OrdersDataContext(_connectionString);
